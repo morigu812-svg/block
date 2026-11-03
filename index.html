@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080e1b">
+<meta name="description" content="BLOCK CORE — シンプルで奥深いブロックパズル">
+<title>BLOCK CORE</title>
+<style>
+:root{color-scheme:dark;--bg:#080e1b;--panel:#101b2d;--line:#263c58;--cyan:#63ddff;--muted:#8da1b8}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;padding:22px 14px 30px;background:radial-gradient(ellipse at 50% -10%,#1a3c5c 0,transparent 52%),var(--bg);color:#edf7ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.app{width:min(100%,500px)}header{display:flex;align-items:center;justify-content:space-between;margin:0 2px 20px}.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#17445e,#10233a);border:1px solid #3d7897;color:var(--cyan);font-size:23px;box-shadow:0 0 24px #38c9ff20}.brand h1{font-size:19px;letter-spacing:2px;margin:0}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;margin-top:2px}.iconbtn{width:42px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--panel);font-size:17px;cursor:pointer;color:var(--cyan)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}.stat{padding:13px 16px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#14263d,#0e192a)}.label{font-size:10px;letter-spacing:1.4px;color:var(--muted)}.value{font-size:27px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:3px}.best{color:var(--cyan)}
+.panel{padding:11px;border:1px solid #29435f;border-radius:20px;background:linear-gradient(145deg,#14243a,#0d1727);box-shadow:0 18px 55px #0005}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;padding:8px;border:1px solid #20364f;border-radius:13px;background:#091321;touch-action:none}.cell{aspect-ratio:1;min-width:0;border-radius:5px;background:#17283d;border:1px solid #20344d;transition:background .1s,border-color .1s}.cell.filled{background:linear-gradient(145deg,#69e4ff,#2788c8);border-color:#9aeaff;box-shadow:inset 0 1px 4px #fff5,0 0 8px #38bfff24}.cell.preview{background:#35b9e8a8;border-color:#8ceaff}.cell.invalid{background:#ed657b88;border-color:#ff9ca9}
+.section{display:flex;justify-content:space-between;align-items:center;margin:20px 3px 11px}.section strong{font-size:12px;letter-spacing:1.2px}.section span{font-size:10px;color:var(--muted)}.pieces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.piece{min-height:104px;display:grid;place-items:center;border-radius:15px;border:1px solid var(--line);background:#101c2d;cursor:grab;touch-action:none;padding:9px}.piece.selected{border-color:var(--cyan);background:#153149;box-shadow:0 0 18px #55dfff25;transform:translateY(-2px)}.piece.used{opacity:.16;pointer-events:none}.mini{display:grid;gap:4px;justify-content:center;align-content:center}.mini i{width:17px;height:17px;border-radius:4px;background:linear-gradient(145deg,#62e1ff,#278bd0);border:1px solid #9aeaff}.mini i.empty{visibility:hidden}
+.hint{min-height:17px;text-align:center;color:var(--muted);font-size:11px;margin:13px 0 3px}.actions{display:flex;gap:10px;margin-top:14px}.action{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#14243a;font-size:12px;font-weight:700;cursor:pointer}.action.primary{background:linear-gradient(110deg,#167eae,#285bc1);border-color:#4abde9}.action:active,.iconbtn:active{transform:scale(.98)}footer{text-align:center;color:#536b83;font-size:10px;letter-spacing:2px;margin-top:22px}
+.overlay{position:fixed;inset:0;z-index:4;display:none;place-items:center;padding:20px;background:#030812d9;backdrop-filter:blur(9px)}.overlay.show{display:grid}.modal{width:min(100%,330px);padding:27px;border-radius:22px;border:1px solid #3b6687;background:linear-gradient(145deg,#172a43,#0c1728);text-align:center;box-shadow:0 20px 80px #0009}.modal h2{margin:0 0 8px}.modal p{font-size:13px;color:var(--muted)}.final{font-size:42px;font-weight:900;color:var(--cyan);margin:14px 0}
+@media(max-width:390px){body{padding:13px 9px 24px}.board{gap:4px;padding:6px}.piece{min-height:88px}.mini i{width:14px;height:14px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand"><div class="logo">▦</div><div><h1>BLOCK CORE</h1><small>ORIGINAL PUZZLE SYSTEM</small></div></div><button class="iconbtn" id="sound" aria-label="サウンド切替">♪</button></header>
+<div class="stats"><div class="stat"><div class="label">CURRENT SCORE</div><div class="value" id="score">0</div></div><div class="stat"><div class="label">BEST SCORE</div><div class="value best" id="best">0</div></div></div>
+<section class="panel"><div class="board" id="board" aria-label="ゲーム盤面"></div></section>
+<div class="section"><strong>BLOCK SELECT</strong><span>選択して盤面に配置</span></div>
+<div class="pieces" id="pieces"></div><p class="hint" id="hint">ブロックを選んで盤面をタップ、またはドラッグ</p>
+<div class="actions"><button class="action" id="reset">↻ 最初から</button><button class="action primary" id="new">新しいゲーム</button></div>
+<footer>BLOCK CORE · PLAY YOUR STRATEGY</footer>
+</main>
+<div class="overlay" id="over"><div class="modal"><h2>GAME OVER</h2><p>置けるブロックがなくなりました。</p><div class="final" id="final">0</div><p>YOUR FINAL SCORE</p><button class="action primary" id="again" style="width:100%;margin-top:12px">もう一度プレイ</button></div></div>
+<script>
+(()=>{
+const N=8,shapes=[[[0,0]],[[0,0],[0,1]],[[0,0],[1,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[1,2]],[[0,0],[1,0],[1,1],[1,2]],[[0,0],[0,1],[0,2],[1,1]],[[0,1],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,1],[1,2]],[[0,0],[1,0],[1,1],[2,1]],[[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],[[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,0],[1,0],[2,0],[0,1],[0,2]]];
+const $=id=>document.getElementById(id),boardEl=$("board"),piecesEl=$("pieces");
+let grid,hand=[],selected=-1,score=0,best=Number(localStorage.getItem("block-core-best")||0),sound=false,drag=null;
+const cloneShape=s=>s.map(p=>[...p]),randomShape=()=>cloneShape(shapes[Math.floor(Math.random()*shapes.length)]);
+function stats(){$("score").textContent=score.toLocaleString("ja-JP");$("best").textContent=best.toLocaleString("ja-JP")}
+function renderBoard(preview=null){boardEl.innerHTML="";for(let r=0;r<N;r++)for(let c=0;c<N;c++){const el=document.createElement("div");el.className="cell"+(grid[r][c]?" filled":"");if(preview){const hit=preview.cells.some(([x,y])=>x===r&&y===c);if(hit)el.classList.add(preview.ok?"preview":"invalid")}el.dataset.r=r;el.dataset.c=c;boardEl.append(el)}}
+function renderPieces(){piecesEl.innerHTML="";hand.forEach((shape,i)=>{const el=document.createElement("button");el.className="piece"+(!shape?" used":"")+(i===selected?" selected":"");el.type="button";if(shape){const rows=Math.max(...shape.map(p=>p[0]))+1,cols=Math.max(...shape.map(p=>p[1]))+1,mini=document.createElement("span");mini.className="mini";mini.style.gridTemplateColumns="repeat("+cols+",17px)";for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const bit=document.createElement("i");if(!shape.some(p=>p[0]===r&&p[1]===c))bit.className="empty";mini.append(bit)}el.append(mini);el.addEventListener("click",()=>{selected=i;renderPieces();$("hint").textContent="配置する場所をタップ、またはドラッグ"})}piecesEl.append(el)})}
+function can(shape,r,c){return shape.every(([dr,dc])=>r+dr>=0&&r+dr<N&&c+dc>=0&&c+dc<N&&!grid[r+dr][c+dc])}
+function place(shape,r,c){if(!can(shape,r,c))return false;shape.forEach(([dr,dc])=>grid[r+dr][c+dc]=1);score+=shape.length;let rr=[],cc=[];for(let i=0;i<N;i++){if(grid[i].every(Boolean))rr.push(i);if(grid.every(row=>row[i]))cc.push(i)}rr.forEach(r=>grid[r].fill(0));cc.forEach(c=>grid.forEach(row=>row[c]=0));let cleared=rr.length+cc.length;if(cleared){score+=cleared*10+Math.max(0,cleared-1)*5;if(sound)beep()}if(score>best){best=score;localStorage.setItem("block-core-best",String(best))}stats();renderBoard();return true}
+function checkOver(){if(hand.every(x=>!x))return;let possible=hand.some(shape=>shape&&Array.from({length:N},(_,r)=>Array.from({length:N},(_,c)=>can(shape,r,c))).flat().some(Boolean));if(!possible){$("final").textContent=score.toLocaleString("ja-JP");$("over").classList.add("show")}}
+function nextHand(){hand=[randomShape(),randomShape(),randomShape()];selected=-1;renderPieces();checkOver()}
+function finishPlacement(){hand[selected]=null;selected=-1;if(hand.every(x=>!x))nextHand();else{renderPieces();checkOver()}}
+function attempt(r,c){if(selected<0||!hand[selected])return;if(!place(hand[selected],r,c)){$("hint").textContent="そこには置けないよ。別の場所を選んでね";return}finishPlacement();$("hint").textContent="次のブロックを選択しよう"}
+function start(){grid=Array.from({length:N},()=>Array(N).fill(0));score=0;stats();$("over").classList.remove("show");renderBoard();nextHand();$("hint").textContent="ブロックを選んで盤面をタップ、またはドラッグ"}
+function cellAt(x,y){const el=document.elementFromPoint(x,y)?.closest(".cell");return el&&boardEl.contains(el)?el:null}
+function previewAt(x,y){if(!drag)return;const el=cellAt(x,y);if(!el){renderBoard();return}const r=+el.dataset.r,c=+el.dataset.c,s=hand[drag.index];renderBoard({cells:s.map(([a,b])=>[r+a,c+b]),ok:can(s,r,c)})}
+function beep(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=650;g.gain.setValueAtTime(.07,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.16);o.start();o.stop(ctx.currentTime+.16)}catch(e){}}
+piecesEl.addEventListener("pointerdown",e=>{const btn=e.target.closest(".piece");if(!btn||btn.classList.contains("used"))return;const index=[...piecesEl.children].indexOf(btn);drag={index,pointerId:e.pointerId};selected=index;renderPieces();$("hint").textContent="盤面までドラッグして配置";e.preventDefault()});
+document.addEventListener("pointermove",e=>{if(drag)previewAt(e.clientX,e.clientY)});
+document.addEventListener("pointerup",e=>{if(!drag)return;const d=drag;drag=null;const el=cellAt(e.clientX,e.clientY);if(el){selected=d.index;attempt(+el.dataset.r,+el.dataset.c)}else{renderBoard();renderPieces()}});
+boardEl.addEventListener("click",e=>{const el=e.target.closest(".cell");if(el&&!drag)attempt(+el.dataset.r,+el.dataset.c)});
+$("reset").addEventListener("click",start);$("new").addEventListener("click",start);$("again").addEventListener("click",start);$("sound").addEventListener("click",e=>{sound=!sound;e.currentTarget.textContent=sound?"♫":"♪"});
+stats();start();
+})();
+</script>
+</body></html>
